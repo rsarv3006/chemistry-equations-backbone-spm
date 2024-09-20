@@ -440,14 +440,16 @@ public struct Equation {
     public var id: String
     public var title: String
     public var description: String
+    public var filters: [String]
     public var fieldLabels: [String]
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
-    public init(id: String, title: String, description: String, fieldLabels: [String]) {
+    public init(id: String, title: String, description: String, filters: [String], fieldLabels: [String]) {
         self.id = id
         self.title = title
         self.description = description
+        self.filters = filters
         self.fieldLabels = fieldLabels
     }
 }
@@ -465,6 +467,9 @@ extension Equation: Equatable, Hashable {
         if lhs.description != rhs.description {
             return false
         }
+        if lhs.filters != rhs.filters {
+            return false
+        }
         if lhs.fieldLabels != rhs.fieldLabels {
             return false
         }
@@ -475,6 +480,7 @@ extension Equation: Equatable, Hashable {
         hasher.combine(id)
         hasher.combine(title)
         hasher.combine(description)
+        hasher.combine(filters)
         hasher.combine(fieldLabels)
     }
 }
@@ -487,6 +493,7 @@ public struct FfiConverterTypeEquation: FfiConverterRustBuffer {
                 id: FfiConverterString.read(from: &buf), 
                 title: FfiConverterString.read(from: &buf), 
                 description: FfiConverterString.read(from: &buf), 
+                filters: FfiConverterSequenceString.read(from: &buf), 
                 fieldLabels: FfiConverterSequenceString.read(from: &buf)
         )
     }
@@ -495,6 +502,7 @@ public struct FfiConverterTypeEquation: FfiConverterRustBuffer {
         FfiConverterString.write(value.id, into: &buf)
         FfiConverterString.write(value.title, into: &buf)
         FfiConverterString.write(value.description, into: &buf)
+        FfiConverterSequenceString.write(value.filters, into: &buf)
         FfiConverterSequenceString.write(value.fieldLabels, into: &buf)
     }
 }
