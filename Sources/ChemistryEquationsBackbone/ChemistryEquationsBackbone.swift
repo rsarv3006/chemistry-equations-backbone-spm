@@ -518,12 +518,14 @@ public func FfiConverterTypeEquation_lower(_ value: Equation) -> RustBuffer {
 
 
 public struct EquationSection {
+    public var id: String
     public var title: String
     public var equations: [Equation]
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
-    public init(title: String, equations: [Equation]) {
+    public init(id: String, title: String, equations: [Equation]) {
+        self.id = id
         self.title = title
         self.equations = equations
     }
@@ -533,6 +535,9 @@ public struct EquationSection {
 
 extension EquationSection: Equatable, Hashable {
     public static func ==(lhs: EquationSection, rhs: EquationSection) -> Bool {
+        if lhs.id != rhs.id {
+            return false
+        }
         if lhs.title != rhs.title {
             return false
         }
@@ -543,6 +548,7 @@ extension EquationSection: Equatable, Hashable {
     }
 
     public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
         hasher.combine(title)
         hasher.combine(equations)
     }
@@ -553,12 +559,14 @@ public struct FfiConverterTypeEquationSection: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> EquationSection {
         return
             try EquationSection(
+                id: FfiConverterString.read(from: &buf), 
                 title: FfiConverterString.read(from: &buf), 
                 equations: FfiConverterSequenceTypeEquation.read(from: &buf)
         )
     }
 
     public static func write(_ value: EquationSection, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.id, into: &buf)
         FfiConverterString.write(value.title, into: &buf)
         FfiConverterSequenceTypeEquation.write(value.equations, into: &buf)
     }
