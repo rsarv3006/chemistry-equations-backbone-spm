@@ -437,19 +437,17 @@ fileprivate struct FfiConverterString: FfiConverter {
 
 
 public struct Equation {
-    public var id: EquationIds
+    public var id: String
     public var title: String
     public var description: String
-    public var filters: [EquationFilter]
     public var fieldLabels: [String]
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
-    public init(id: EquationIds, title: String, description: String, filters: [EquationFilter], fieldLabels: [String]) {
+    public init(id: String, title: String, description: String, fieldLabels: [String]) {
         self.id = id
         self.title = title
         self.description = description
-        self.filters = filters
         self.fieldLabels = fieldLabels
     }
 }
@@ -467,9 +465,6 @@ extension Equation: Equatable, Hashable {
         if lhs.description != rhs.description {
             return false
         }
-        if lhs.filters != rhs.filters {
-            return false
-        }
         if lhs.fieldLabels != rhs.fieldLabels {
             return false
         }
@@ -480,7 +475,6 @@ extension Equation: Equatable, Hashable {
         hasher.combine(id)
         hasher.combine(title)
         hasher.combine(description)
-        hasher.combine(filters)
         hasher.combine(fieldLabels)
     }
 }
@@ -490,19 +484,17 @@ public struct FfiConverterTypeEquation: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Equation {
         return
             try Equation(
-                id: FfiConverterTypeEquationIds.read(from: &buf), 
+                id: FfiConverterString.read(from: &buf), 
                 title: FfiConverterString.read(from: &buf), 
                 description: FfiConverterString.read(from: &buf), 
-                filters: FfiConverterSequenceTypeEquationFilter.read(from: &buf), 
                 fieldLabels: FfiConverterSequenceString.read(from: &buf)
         )
     }
 
     public static func write(_ value: Equation, into buf: inout [UInt8]) {
-        FfiConverterTypeEquationIds.write(value.id, into: &buf)
+        FfiConverterString.write(value.id, into: &buf)
         FfiConverterString.write(value.title, into: &buf)
         FfiConverterString.write(value.description, into: &buf)
-        FfiConverterSequenceTypeEquationFilter.write(value.filters, into: &buf)
         FfiConverterSequenceString.write(value.fieldLabels, into: &buf)
     }
 }
@@ -774,28 +766,6 @@ fileprivate struct FfiConverterSequenceTypeEquationSection: FfiConverterRustBuff
         seq.reserveCapacity(Int(len))
         for _ in 0 ..< len {
             seq.append(try FfiConverterTypeEquationSection.read(from: &buf))
-        }
-        return seq
-    }
-}
-
-fileprivate struct FfiConverterSequenceTypeEquationFilter: FfiConverterRustBuffer {
-    typealias SwiftType = [EquationFilter]
-
-    public static func write(_ value: [EquationFilter], into buf: inout [UInt8]) {
-        let len = Int32(value.count)
-        writeInt(&buf, len)
-        for item in value {
-            FfiConverterTypeEquationFilter.write(item, into: &buf)
-        }
-    }
-
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [EquationFilter] {
-        let len: Int32 = try readInt(&buf)
-        var seq = [EquationFilter]()
-        seq.reserveCapacity(Int(len))
-        for _ in 0 ..< len {
-            seq.append(try FfiConverterTypeEquationFilter.read(from: &buf))
         }
         return seq
     }
