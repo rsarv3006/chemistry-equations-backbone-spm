@@ -778,10 +778,10 @@ fileprivate struct FfiConverterSequenceTypeEquationSection: FfiConverterRustBuff
         return seq
     }
 }
-public func calculateEquation(equationId: EquationIds, input: [Double]) -> Double {
+public func calculateEquation(equationId: String, input: [Double]) -> Double {
     return try!  FfiConverterDouble.lift(try! rustCall() {
     uniffi_ChemistryEquationsBackbone_fn_func_calculate_equation(
-        FfiConverterTypeEquationIds.lower(equationId),
+        FfiConverterString.lower(equationId),
         FfiConverterSequenceDouble.lower(input),$0
     )
 })
@@ -808,7 +808,7 @@ private var initializationResult: InitializationResult = {
     if bindings_contract_version != scaffolding_contract_version {
         return InitializationResult.contractVersionMismatch
     }
-    if (uniffi_ChemistryEquationsBackbone_checksum_func_calculate_equation() != 56060) {
+    if (uniffi_ChemistryEquationsBackbone_checksum_func_calculate_equation() != 18350) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_ChemistryEquationsBackbone_checksum_func_get_equations() != 14308) {
